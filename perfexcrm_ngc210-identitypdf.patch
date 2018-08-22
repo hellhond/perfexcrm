@@ -1,0 +1,266 @@
+diff -BurN perfex_crm-210-test/application/composer.json perfex_crm-210/application/composer.json
+--- perfex_crm-210-test/application/composer.json	2018-08-22 12:57:50.667432000 +0200
++++ perfex_crm-210/application/composer.json	2018-08-22 12:58:38.587432000 +0200
+@@ -19,6 +19,7 @@
+         "omnipay/paypal": "^3.0",
+         "omnipay/authorizenet": "3.x@dev",
+         "2checkout/2checkout-php": "^0.3.1",
+-        "willdurand/email-reply-parser": "^2.8"
++        "willdurand/email-reply-parser": "^2.8",
++        "setasign/fpdi-fpdf": "^2.0"
+     }
+ }
+diff -BurN perfex_crm-210-test/application/controllers/admin/Settings.php perfex_crm-210/application/controllers/admin/Settings.php
+--- perfex_crm-210-test/application/controllers/admin/Settings.php	2018-08-22 12:57:50.671432000 +0200
++++ perfex_crm-210/application/controllers/admin/Settings.php	2018-08-22 12:58:04.523432000 +0200
+@@ -24,6 +24,7 @@
+             $logo_uploaded     = (handle_company_logo_upload() ? true : false);
+             $favicon_uploaded  = (handle_favicon_upload() ? true : false);
+             $signatureUploaded = (handle_company_signature_upload() ? true : false);
++            $identityUploaded  = (handle_company_corporate_identity_upload() ? true : false);
+ 
+             $post_data = $this->input->post();
+             $tmpData   = $this->input->post(null, false);
+@@ -155,6 +156,22 @@
+         redirect(admin_url('settings?group=pdf&tab=signature'));
+     }
+ 
++    public function remove_identity_pdf()
++    {
++        if (!has_permission('settings', '', 'delete')) {
++            access_denied('settings');
++        }
++
++        $sPdf = get_option('identity_pdf');
++        if (file_exists(get_upload_path_by_type('company') . '/' . $sPdf)) {
++            unlink(get_upload_path_by_type('company') . '/' . $sPdf);
++        }
++
++        update_option('identity_pdf', '');
++
++        redirect(admin_url('settings?group=pdf'));
++    }
++
+     /* Remove company logo from settings / ajax */
+     public function remove_company_logo($type = '')
+     {
+diff -BurN perfex_crm-210-test/application/helpers/pdf_helper.php perfex_crm-210/application/helpers/pdf_helper.php
+--- perfex_crm-210-test/application/helpers/pdf_helper.php	2018-08-22 12:57:50.675432000 +0200
++++ perfex_crm-210/application/helpers/pdf_helper.php	2018-08-22 12:58:04.523432000 +0200
+@@ -202,6 +202,9 @@
+     $pdf->setImageScale(1.53);
+     $pdf->setJPEGQuality(100);
+     $pdf->AddPage($formatArray['orientation'], $formatArray['format']);
++    if ($pdf->tplId !== null) {
++        $pdf->useTemplate($pdf->tplId, 0, 0, 210, 297);
++    }
+ 
+     if ($CI->input->get('print') == 'true') {
+         // force print dialog
+@@ -281,6 +284,9 @@
+     $pdf->setImageScale(1.53);
+     $pdf->setJPEGQuality(100);
+     $pdf->AddPage($formatArray['orientation'], $formatArray['format']);
++    if ($pdf->tplId !== null) {
++        $pdf->useTemplate($pdf->tplId, 0, 0, 210, 297);
++    }
+ 
+     if ($CI->input->get('print') == 'true') {
+         // force print dialog
+@@ -359,6 +365,9 @@
+     $pdf->SetFont($font_name, '', $font_size);
+     $pdf->setJPEGQuality(100);
+     $pdf->AddPage($formatArray['orientation'], $formatArray['format']);
++    if ($pdf->tplId !== null) {
++        $pdf->useTemplate($pdf->tplId, 0, 0, 210, 297);
++    }
+     if ($CI->input->get('print') == 'true') {
+         // force print dialog
+         $js = 'print(true);';
+@@ -442,6 +451,9 @@
+     $pdf->SetAuthor(get_option('company'));
+     $pdf->SetFont($font_name, '', $font_size);
+     $pdf->AddPage($formatArray['orientation'], $formatArray['format']);
++    if ($pdf->tplId !== null) {
++        $pdf->useTemplate($pdf->tplId, 0, 0, 210, 297);
++    }
+     if ($CI->input->get('print') == 'true') {
+         // force print dialog
+         $js = 'print(true);';
+@@ -521,6 +533,9 @@
+     $pdf->SetAuthor(get_option('company'));
+     $pdf->SetFont($font_name, '', $font_size);
+     $pdf->AddPage($formatArray['orientation'], $formatArray['format']);
++    if ($pdf->tplId !== null) {
++        $pdf->useTemplate($pdf->tplId, 0, 0, 210, 297);
++    }
+     if ($CI->input->get('print') == 'true') {
+         // force print dialog
+         $js = 'print(true);';
+@@ -597,6 +612,9 @@
+     $pdf->SetAuthor(get_option('company'));
+     $pdf->SetFont($font_name, '', $font_size);
+     $pdf->AddPage($formatArray['orientation'], $formatArray['format']);
++    if ($pdf->tplId !== null) {
++        $pdf->useTemplate($pdf->tplId, 0, 0, 210, 297);
++    }
+ 
+     if ($CI->input->get('print') == 'true') {
+         // force print dialog
+@@ -657,6 +675,9 @@
+     $pdf->setImageScale(1.53);
+     $pdf->setJPEGQuality(100);
+     $pdf->AddPage($formatArray['orientation'], $formatArray['format']);
++    if ($pdf->tplId !== null) {
++        $pdf->useTemplate($pdf->tplId, 0, 0, 210, 297);
++    }
+ 
+     if ($CI->input->get('print') == 'true') {
+         // force print dialog
+diff -BurN perfex_crm-210-test/application/helpers/upload_helper.php perfex_crm-210/application/helpers/upload_helper.php
+--- perfex_crm-210-test/application/helpers/upload_helper.php	2018-08-22 12:57:50.675432000 +0200
++++ perfex_crm-210/application/helpers/upload_helper.php	2018-08-22 12:58:04.527432000 +0200
+@@ -589,6 +589,50 @@
+     return $success;
+ }
+ /**
++ * Check for company corporate identity (PDF) upload
++ * @return boolean
++ */
++function handle_company_corporate_identity_upload()
++{
++    if (isset($_FILES['identity_pdf']) && _perfex_upload_error($_FILES['identity_pdf']['error'])) {
++        set_alert('warning', _perfex_upload_error($_FILES['identity_pdf']['error']));
++
++        return false;
++    }
++    if (isset($_FILES['identity_pdf']['name']) && $_FILES['identity_pdf']['name'] != '') {
++        do_action('before_upload_identity_pdf_attachment');
++        $path = get_upload_path_by_type('company');
++        // Get the temp file path
++        $tmpFilePath = $_FILES['identity_pdf']['tmp_name'];
++        // Make sure we have a filepath
++        if (!empty($tmpFilePath) && $tmpFilePath != '') {
++            // Getting file extension
++            $path_parts = pathinfo($_FILES['identity_pdf']['name']);
++            $extension  = $path_parts['extension'];
++            $extension  = strtolower($extension);
++
++            $allowed_extensions = ['pdf'];
++            if (!in_array($extension, $allowed_extensions)) {
++                set_alert('warning', 'Only PDF files allowed.');
++
++                return false;
++            }
++            // Setup our new file path
++            $filename    = 'identity' . '.' . $extension;
++            $newFilePath = $path . $filename;
++            _maybe_create_upload_path($path);
++            // Upload the file into the company uploads dir
++            if (move_uploaded_file($tmpFilePath, $newFilePath)) {
++                update_option('identity_pdf', $filename);
++
++                return true;
++            }
++        }
++    }
++
++    return false;
++}
++/**
+  * Check for company logo upload
+  * @return boolean
+  */
+diff -BurN perfex_crm-210-test/application/language/english/english_lang.php perfex_crm-210/application/language/english/english_lang.php
+--- perfex_crm-210-test/application/language/english/english_lang.php	2018-08-22 12:57:50.679432000 +0200
++++ perfex_crm-210/application/language/english/english_lang.php	2018-08-22 12:59:53.659432000 +0200
+@@ -3500,6 +3500,7 @@
+ $lang['timesheet_duration_instead']                = 'Enter time duration instead';
+ $lang['timesheet_date_instead']                    = 'Set start and end time instead';
+ $lang['allow_non_admin_members_to_import_leads']   = 'Allow non-admin staff members to import leads';
++$lang['identity_pdf']                              = 'Corporate Identity PDF (uploaded PDF is used as background on invoices, estimates, etc.)';
+ $lang['project_hide_tasks_settings_info']          = 'Tasks are excluded from the main tasks table for this project, you can view the project tasks only in this area.';
+ 
+ # Version 1.9.9
+diff -BurN perfex_crm-210-test/application/libraries/Pdf.php perfex_crm-210/application/libraries/Pdf.php
+--- perfex_crm-210-test/application/libraries/Pdf.php	2018-08-22 12:57:50.687432000 +0200
++++ perfex_crm-210/application/libraries/Pdf.php	2018-08-22 13:00:27.711432000 +0200
+@@ -2,9 +2,17 @@
+ 
+ defined('BASEPATH') or exit('No direct script access allowed');
+ 
+-class Pdf extends TCPDF
++use setasign\Fpdi;
++
++class Pdf extends Fpdi\TcpdfFpdi
+ {
+     /**
++     * PDF Template Id
++     * @var object
++     */
++    public $tplId = null;
++
++    /**
+      * Stores font list
+      * @var array
+      */
+@@ -42,6 +50,16 @@
+         $this->setLanguageArray($lg);
+         $this->_fonts_list = $this->fontlist;
+ 
++        $identity_pdf = get_option('identity_pdf');
++        if (!empty($identity_pdf)) {
++            $tplfile = BASEPATH . '/../uploads/company/'.$identity_pdf;
++
++            if (file_exists($tplfile)) {
++                $pageCount = $this->setSourceFile($tplfile);
++                $this->tplId = $this->importPage(1, "/MediaBox");
++            }
++        }
++
+         do_action('pdf_construct', ['pdf_instance' => $this, 'type' => $this->pdf_type]);
+     }
+ 
+@@ -60,6 +78,10 @@
+ 
+     public function Header()
+     {
++        if ($this->tplId !== null) {
++            $this->useTemplate($this->tplId);
++        }
++
+         do_action('pdf_header', ['pdf_instance' => $this, 'type' => $this->pdf_type]);
+     }
+ 
+diff -BurN perfex_crm-210-test/application/views/admin/settings/includes/pdf.php perfex_crm-210/application/views/admin/settings/includes/pdf.php
+--- perfex_crm-210-test/application/views/admin/settings/includes/pdf.php	2018-08-22 12:57:50.951432000 +0200
++++ perfex_crm-210/application/views/admin/settings/includes/pdf.php	2018-08-22 12:58:04.527432000 +0200
+@@ -47,6 +47,28 @@
+         <?php render_yes_no_option('show_transactions_on_invoice_pdf','show_transactions_on_invoice_pdf'); ?>
+         <hr />
+         <?php render_yes_no_option('show_page_number_on_pdf','show_page_number_on_pdf'); ?>
++        <hr />
++        <?php $identity_pdf = get_option('identity_pdf'); ?>
++        <?php if($identity_pdf != ''){ ?>
++        <div class="form-group">
++            <div class="row">
++                <div class="col-md-9">
++                    <a href="<?php echo base_url('uploads/company/'.$identity_pdf); ?>" class="img img-responsive"><?php echo _l('identity_pdf'); ?></a>
++                </div>
++                <?php if(has_permission('settings','','delete')){ ?>
++                <div class="col-md-3 text-right">
++                    <a href="<?php echo admin_url('settings/remove_identity_pdf'); ?>" class="_delete text-danger"><i class="fa fa-remove"></i></a>
++                </div>
++                <?php } ?>
++            </div>
++        </div>
++        <div class="clearfix"></div>
++        <?php } else { ?>
++        <div class="form-group">
++            <label for="identity_pdf" class="control-label"><?php echo _l('identity_pdf'); ?></label>
++            <input type="file" name="identity_pdf" class="form-control">
++        </div>
++        <?php } ?>
+     </div>
+     <div role="tabpanel" class="tab-pane" id="signature">
+      <?php render_yes_no_option('show_pdf_signature_invoice','show_pdf_signature_invoice'); ?>
