@@ -8,23 +8,27 @@
 
 * Identity PDF: add a 'corporate identity' PDF as background to most PDF documents. This eliminates the need to implement the look and feel of your existing documents in to Perfex CRM.
 
-## Instructions
+## Prerequisites
 
 The below instructions are for Linux servers only, using the 'patch' command.
 
 * the following is quite technical, if you are not sure what you are doing, or not confident to execute the below, please wait until Perfex CRM maybe integrates this code in the next version.
 
-* make a backup of your code & database first! (you can never be safe enough)
+* **make a backup of your code & database first!** (you can never be safe enough)
 
-* copy / download the patch file to the root / base directory of Perfex CRM
+## Instructions
 
-* in the root / base directory of your Perfex CRM execute the following
+### Installation
+
+Copy / download the patch file to the root / base directory of Perfex CRM.
+
+In the root / base directory of your Perfex CRM execute the following
 
 ```
-patch -p1 < perfexcrm_ngc201-identitypdf.patch
+patch -p1 < <patch filename>
 ```
 
-You should see
+You should see something similar as below, depending on the patch you have selected, this can be different,
 
 ```
 patching file application/composer.json
@@ -36,7 +40,7 @@ patching file application/libraries/Pdf.php
 patching file application/views/admin/settings/includes/pdf.php
 ```
 
-* go to application/vendor, and execute
+* change to application/vendor, and execute
 
 ```
 composer.phar require setasign/fpdi-fpdf
@@ -53,6 +57,8 @@ insert into tbloptions values (”, ‘identity_pdf’, ”, 0);
 ```
 
 This prepares the option in your database. We did not want to add code to the automatic database upgrade / migrations system, since this would increase the version number, causing problems when a new Perfex CRM version is released.
+
+### Configuration
 
 * Log in to the admin, and go to Setup > Settings, on the bottom of the page you have a new option to upload the Corporate Identity PDF.
 
