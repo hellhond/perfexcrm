@@ -1,6 +1,8 @@
 # Perfex CRM patches
 
-[Perfex CRM|https://www.perfexcrm.com] is a self-hosted CRM application written in PHP. 
+[Perfex CRM](https://www.perfexcrm.com) is a self-hosted CRM application written in PHP. 
+
+<span class="badge-paypal"><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=9JKAQMYRN36EE" title="Donate to this project using Paypal"><img src="https://img.shields.io/badge/paypal-donate-blue.svg" alt="PayPal donate button" /></a></span>
 
 ## Instructions
 
