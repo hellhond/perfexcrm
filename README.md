@@ -1,8 +1,12 @@
 # Perfex CRM patches
 
-[Perfex CRM](https://www.perfexcrm.com) is a self-hosted CRM application written in PHP. 
+[Perfex CRM](https://www.perfexcrm.com) is a self-hosted CRM application written in PHP. This repository provides a set of unofficial patches to add specific functionality to Perfex CRM.
 
 <span class="badge-paypal"><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=9JKAQMYRN36EE" title="Donate to this project using Paypal"><img src="https://img.shields.io/badge/paypal-donate-blue.svg" alt="PayPal donate button" /></a></span>
+
+## Patches
+
+* Identity PDF: add a 'corporate identity' PDF as background to most PDF documents. This eliminates the need to implement the look and feel of your existing documents in to Perfex CRM.
 
 ## Instructions
 
