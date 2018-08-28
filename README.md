@@ -1,6 +1,10 @@
-The below instructions are for Linux servers only, using the 'patch' command.
+# Perfex CRM patches
 
-# Instructions
+[Perfex CRM|https://www.perfexcrm.com] is a self-hosted CRM application written in PHP. 
+
+## Instructions
+
+The below instructions are for Linux servers only, using the 'patch' command.
 
 * the following is quite technical, if you are not sure what you are doing, or not confident to execute the below, please wait until Perfex CRM maybe integrates this code in the next version.
 
@@ -52,4 +56,17 @@ This prepares the option in your database. We did not want to add code to the au
 
 * it is possible that your invoice, estimate, etc. templates will overlap with your imported corporate identity. You will probably need to change the template a bit.
 
-This is just an initial version, please let me know if there are issues.
+
+## Bugs & Features
+
+If you find a bug, please use the Github Issue system for this repository to submit the details of your bug report.
+
+If you would like to have a new feature implemented, use the Github Issue system to submit your feature request.
+
+
+## Legal
+
+This is an unofficial patch to Perfex CRM, built by/for the Perfex CRM community. The app is provided "as is", without warranty of any kind.
+
+
+
